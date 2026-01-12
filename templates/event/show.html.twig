@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-8">
+        <h1>{{ event.title }}</h1>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Description</h5>
+                <p class="card-text">{{ event.description }}</p>
+
+                <hr>
+
+                <p><strong>Date :</strong> {{ event.date|date('d/m/Y H:i') }}</p>
+                <p><strong>Lieu :</strong> {{ event.location }}</p>
+                <p><strong>Capacite :</strong> {{ event.capacity }} places</p>
+                <p><strong>Reservations :</strong> {{ event.reservations|length }} / {{ event.capacity }}</p>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            {% if app.user %}
+                {% if hasReserved %}
+                    <div class="alert alert-success">
+                        Vous avez deja reserve pour cet evenement.
+                    </div>
+                {% elseif event.reservations|length >= event.capacity %}
+                    <div class="alert alert-warning">
+                        Cet evenement est complet.
+                    </div>
+                {% else %}
+                    <form action="{{ path('app_event_reserve', {id: event.id}) }}" method="post">
+                        <input type="hidden" name="_token" value="{{ csrf_token('reserve' ~ event.id) }}">
+                        <button type="submit" class="btn btn-success btn-lg">Reserver</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">
+                    <a href="{{ path('app_login') }}">Connectez-vous</a> pour reserver une place.
+                </div>
+            {% endif %}
+        </div>
+
+        <a href="{{ path('app_home') }}" class="btn btn-secondary mt-3">Retour a la liste</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Liste des evenements{% endblock %}
+
+{% block body %}
+<h1>Evenements a venir</h1>
+
+{% if events is empty %}
+    <div class="alert alert-info">
+        Aucun evenement a venir pour le moment.
+    </div>
+{% else %}
+    <div class="row">
+        {% for event in events %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text">
+                        <strong>Date :</strong> {{ event.date|date('d/m/Y H:i') }}<br>
+                        <strong>Lieu :</strong> {{ event.location }}
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('app_event_show', {id: event.id}) }}" class="btn btn-primary">Voir</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
