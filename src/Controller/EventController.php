@@ -15,12 +15,22 @@ use Symfony\Component\Routing\Attribute\Route;
 class EventController extends AbstractController
 {
     #[Route('/', name: 'app_home')]
-    public function index(EventRepository $eventRepository): Response
+    public function index(EventRepository $eventRepository, ReservationRepository $reservationRepository): Response
     {
         $events = $eventRepository->findUpcomingEvents();
 
+        // Récupérer les IDs des événements réservés par l'utilisateur connecté
+        $reservedEventIds = [];
+        if ($this->getUser()) {
+            $userReservations = $reservationRepository->findBy(['user' => $this->getUser()]);
+            foreach ($userReservations as $reservation) {
+                $reservedEventIds[] = $reservation->getEvent()->getId();
+            }
+        }
+
         return $this->render('event/index.html.twig', [
             'events' => $events,
+            'reservedEventIds' => $reservedEventIds,
         ]);
     }
 

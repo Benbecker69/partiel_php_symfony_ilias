@@ -5,54 +5,74 @@
 {% block body %}
 {% for label, messages in app.flashes %}
     {% for message in messages %}
-        <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">
-            {{ message }}
-        </div>
+        <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ message }}</div>
     {% endfor %}
 {% endfor %}
 
+<a href="{{ path('app_home') }}" class="btn btn-secondary mb-4">Retour</a>
+
+{% set placesRestantes = event.capacity - event.reservations|length %}
+
 <div class="row">
-    <div class="col-md-8">
-        <h1>{{ event.title }}</h1>
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h1 class="mb-0">{{ event.title }}</h1>
+                    {% if placesRestantes <= 0 %}
+                        <span class="badge badge-complet">Complet</span>
+                    {% endif %}
+                </div>
 
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title">Description</h5>
-                <p class="card-text">{{ event.description }}</p>
+                <p class="text-muted mb-4">{{ event.description }}</p>
 
-                <hr>
-
-                <p><strong>Date :</strong> {{ event.date|date('d/m/Y H:i') }}</p>
-                <p><strong>Lieu :</strong> {{ event.location }}</p>
-                <p><strong>Capacite :</strong> {{ event.capacity }} places</p>
-                <p><strong>Reservations :</strong> {{ event.reservations|length }} / {{ event.capacity }}</p>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded" style="background:#f8fafc;">
+                            <div class="text-muted small mb-1">Date et heure</div>
+                            <strong>{{ event.date|date('d/m/Y') }} a {{ event.date|date('H:i') }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded" style="background:#f8fafc;">
+                            <div class="text-muted small mb-1">Lieu</div>
+                            <strong>{{ event.location }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded" style="background:#f8fafc;">
+                            <div class="text-muted small mb-1">Capacite</div>
+                            <strong>{{ event.capacity }} places</strong>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded" style="background:#f8fafc;">
+                            <div class="text-muted small mb-1">Places restantes</div>
+                            <strong class="{{ placesRestantes <= 0 ? 'text-danger' : 'text-success' }}">{{ placesRestantes > 0 ? placesRestantes : 'Aucune' }}</strong>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="mt-4">
-            {% if app.user %}
-                {% if hasReserved %}
-                    <div class="alert alert-success">
-                        Vous avez deja reserve pour cet evenement.
-                    </div>
-                {% elseif event.reservations|length >= event.capacity %}
-                    <div class="alert alert-warning">
-                        Cet evenement est complet.
-                    </div>
+        <div class="card mt-4">
+            <div class="card-body p-4">
+                {% if app.user %}
+                    {% if hasReserved %}
+                        <div class="alert alert-success mb-0">Vous avez deja reserve pour cet evenement.</div>
+                    {% elseif placesRestantes <= 0 %}
+                        <div class="alert alert-warning mb-0">Cet evenement est complet.</div>
+                    {% else %}
+                        <form action="{{ path('app_event_reserve', {id: event.id}) }}" method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token('reserve' ~ event.id) }}">
+                            <button type="submit" class="btn btn-success btn-lg w-100">Reserver ma place</button>
+                        </form>
+                    {% endif %}
                 {% else %}
-                    <form action="{{ path('app_event_reserve', {id: event.id}) }}" method="post">
-                        <input type="hidden" name="_token" value="{{ csrf_token('reserve' ~ event.id) }}">
-                        <button type="submit" class="btn btn-success btn-lg">Reserver</button>
-                    </form>
+                    <div class="alert alert-info mb-0"><a href="{{ path('app_login') }}">Connectez-vous</a> pour reserver une place.</div>
                 {% endif %}
-            {% else %}
-                <div class="alert alert-info">
-                    <a href="{{ path('app_login') }}">Connectez-vous</a> pour reserver une place.
-                </div>
-            {% endif %}
+            </div>
         </div>
-
-        <a href="{{ path('app_home') }}" class="btn btn-secondary mt-3">Retour a la liste</a>
     </div>
 </div>
 {% endblock %}
