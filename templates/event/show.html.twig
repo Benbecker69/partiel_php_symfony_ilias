@@ -3,6 +3,14 @@
 {% block title %}{{ event.title }}{% endblock %}
 
 {% block body %}
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
 <div class="row">
     <div class="col-md-8">
         <h1>{{ event.title }}</h1>
